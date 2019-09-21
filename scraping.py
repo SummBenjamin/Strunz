@@ -3,6 +3,8 @@ from urllib2 import urlopen
 from selenium import webdriver
 import time
 import csv
+import sys 
+import os
 
 def get_teams(url):
 	teams = url.split("/")[-2].split("vs")
@@ -24,7 +26,12 @@ def scrape_box(keyword,html):
 
 #creates the urls to the specific matches of match day match_day by reading in containers from the page
 #the final urls to be scraped for stats are contained in match_urls
-match_day = 1
+args = sys.argv[1:]
+if len(args)==0:
+	print "Need match day input"
+	exit()
+
+match_day = args[0]
 url_name = "https://www.bundesliga.com/de/bundesliga/spieltag/2019-2020/" + str(match_day)
 
 client = urlopen(url_name)
@@ -177,13 +184,57 @@ for url in match_urls :
 	#TODO:  -functionality to write to csv file without deleting previous data 
 	#	    -possibility to input match_day variable from console when calling script
 
-	with open(str(home_team)+".csv", mode="w") as home_file:
-		home_writer = csv.writer(home_file, delimiter=",")
-		home_writer.writerow([home_goals_scored,home_goals_received])
+	home_file_name = str(home_team) + ".csv"
+	if not os.path.exists(home_file_name):
+		with open(home_file_name, mode="w") as home_file:
+			home_writer = csv.writer(home_file, delimiter=",")
+			home_writer.writerow(["goals scored","goals received","red cards","yellowred cards","yellow cards","fouls","total fouls",
+				"offsides","corners from the left", "corners from the right", "corners total", "headers on target", 
+				"attempts on target inside box", "shots on target inside box", "attempts on target outside box", 
+				"shots on target outside box", "total attempts on target", "fraction of challenges won", "number of successful passes",
+				"fraction of successful passes","number of unsuccessful passes", "fraction of unsuccessful passes",
+				"number of possesion phases","fraction of possession phases","crosses from the left","crosses from the right",
+				"total number of crosses", "distance in intensive runs","distance in sprints","distance in fast runs",
+				"number of intensive runs","number of sprints","number of fast runs","total distance","average speed"])
+			home_file.close()
 
-	with open(str(away_team)+".csv", mode="w") as away_file:
+	with open(home_file_name, mode="a") as home_file:
+		home_writer = csv.writer(home_file, delimiter=",")
+		home_writer.writerow([home_goals_scored,home_goals_received,home_red_cards,home_yellowred_cards,home_yellow_cards,home_fouls,
+			home_total_fouls,home_offsides,home_left_corners,home_right_corners,home_total_corners,home_total_headers_on_target,
+			home_total_attempts_on_target_inside_box,home_shots_on_target_inside_box,home_total_attempts_on_target_outside_box,
+			home_shots_on_target_outside_box,home_total_attempts_on_target,home_fraction_of_challenges_won,
+			home_number_of_successful_passes,home_fraction_of_successful_passes,home_number_of_unsuccessful_passes,
+			home_fraction_of_unsuccessful_passes,home_number_of_possession_phases,home_fraction_of_possession_phases,home_left_crosses,
+			home_right_crosses,home_total_crosses,home_distance_in_intensive_runs,home_distance_in_sprints,home_distance_in_fast_runs,
+			home_number_of_intensive_runs,home_number_of_sprints,home_number_of_fast_runs,home_total_distance,home_average_speed])
+		home_file.close()
+
+	away_file_name = str(away_team) + ".csv"
+	if not os.path.exists(away_file_name):
+		with open(away_file_name, mode="w") as away_file:
+			away_writer = csv.writer(away_file, delimiter=",")
+			away_writer.writerow(["goals scored","goals received","red cards","yellowred cards","yellow cards","fouls","total fouls",
+				"offsides","corners from the left", "corners from the right", "corners total", "headers on target", 
+				"attempts on target inside box", "shots on target inside box", "attempts on target outside box", 
+				"shots on target outside box", "total attempts on target", "fraction of challenges won", "number of successful passes",
+				"fraction of successful passes","number of unsuccessful passes", "fraction of unsuccessful passes",
+				"number of possesion phases","fraction of possession phases","crosses from the left","crosses from the right",
+				"total number of crosses", "distance in intensive runs","distance in sprints","distance in fast runs",
+				"number of intensive runs","number of sprints","number of fast runs","total distance","average speed"])
+			away_file.close()
+
+	with open(away_file_name, mode="a") as away_file:
 		away_writer = csv.writer(away_file, delimiter=",")
-		away_writer.writerow([away_goals_scored,away_goals_received])
+		away_writer.writerow([away_goals_scored,away_goals_received,away_red_cards,away_yellowred_cards,away_yellow_cards,away_fouls,
+			away_total_fouls,away_offsides,away_left_corners,away_right_corners,away_total_corners,away_total_headers_on_target,
+			away_total_attempts_on_target_inside_box,away_shots_on_target_inside_box,away_total_attempts_on_target_outside_box,
+			away_shots_on_target_outside_box,away_total_attempts_on_target,away_fraction_of_challenges_won,
+			away_number_of_successful_passes,away_fraction_of_successful_passes,away_number_of_unsuccessful_passes,
+			away_fraction_of_unsuccessful_passes,away_number_of_possession_phases,away_fraction_of_possession_phases,away_left_crosses,
+			away_right_crosses,away_total_crosses,away_distance_in_intensive_runs,away_distance_in_sprints,away_distance_in_fast_runs,
+			away_number_of_intensive_runs,away_number_of_sprints,away_number_of_fast_runs,away_total_distance,away_average_speed])
+		away_file.close()
 
 
 
