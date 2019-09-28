@@ -22,6 +22,12 @@ def l_std(trait_list,l,mean):
 	averaged_sum = sum/(len(trait_list)-l)
 	return math.sqrt(averaged_sum)
 
+def get_average(trait_list):
+	average = 0
+	for i in range(len(trait_list)):
+		average += float(trait_list[i])
+	return average/len(trait_list)
+
 team_names = ["1-fc-koeln","borussia-dortmund","fc-schalke-04","borussia-moenchengladbach","fortuna-duesseldorf","sc-paderborn-07",
 "tsg-1899-hoffenheim","1-fc-union-berlin","eintracht-frankfurt","1-fsv-mainz-05","fc-augsburg","hertha-bsc","sport-club-freiburg",
 "vfl-wolfsburg","bayer-04-leverkusen","fc-bayern-muenchen","rb-leipzig","sv-werder-bremen"]
@@ -30,21 +36,38 @@ for team_name in team_names:
 
 	with open(team_name + ".csv") as csv_file:
     		csv_reader = csv.reader(csv_file, delimiter=',')
-    		num_of_matches = 0
     		d_ap = []
     		d_ir = []
     		d_s = []
     		N_ap = []
-    		row_count = 1
+    		#number of matches dominated by the team itself
+    		N_dm = 0
+    		#number of countered dominations
+    		N_cd = 0
+    		row_count = 0
     		for row in csv_reader:
-    			if row_count !=1:
+    			if row_count != 0:
     				d_ap.append(inversion(np.exp((-float(row[33]) + float(row[27]))/100)))
     				d_ir.append(np.exp(-float(row[27])))
     				d_s.append(np.exp(-float(row[28])))
     				N_ap.append(inversion(np.exp(-float(row[18])/float(row[19]))))
+    				f_pp = float(row[23])
+    				if f_pp > 65.0:
+    					N_dm += 1
+    				if f_pp < (100.0 - 65.0) and float(row[0]) > float(row[1]):
+    					N_cd += 1
     			row_count += 1
 		csv_file.close()
 
+	num_of_matches = float(row_count-1)
+	average_d_ap = get_average(d_ap)
+	average_d_ir = get_average(d_ir)
+	average_d_s = get_average(d_s)
+	average_N_ap = get_average(N_ap)
+	f_dm = N_dm/num_of_matches
+	f_cd = inversion(N_cd/num_of_matches)
+	strategy_score = 3.0/20 * (average_d_ap + average_d_ir) + 3.0/10 * (average_d_s + average_N_ap) + 1.0/20 * (f_dm + f_cd)
+	
 	d_ap_rob = []
 	d_ir_rob = []
 	d_s_rob = []
@@ -82,4 +105,11 @@ for team_name in team_names:
 	plt.subplots_adjust(hspace = 0.5)
 	f.savefig(team_name + ".pdf")
 	plt.close()
-    
+
+	file_name = team_name + "_vars_and_measures.csv"
+	with open(file_name, mode="w") as team_file:
+			writer = csv.writer(team_file, delimiter=",")
+			writer.writerow(["d_apr","d_ir","d_s","N_ap","f_dm","f_cd","ss"])
+			writer.writerow([average_d_ap,average_d_ir,average_d_s,average_N_ap,f_dm,f_cd,strategy_score])
+			team_file.close()
+
